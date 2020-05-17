@@ -104,6 +104,8 @@ fun number_in_months_challenge (dates : (int*int*int) list, months : int list) =
 
 fun reasonable_date (date : (int * int * int)) =
     let
+        val valid_year = (year_of date) > 0
+        val valid_month = (month_of date) > 0 andalso (month_of date) <= 12
         val valid_day =
             let
                 val leap = year_of date mod 400 = 0
@@ -113,7 +115,7 @@ fun reasonable_date (date : (int * int * int)) =
                     if x = 1
                     then hd xs
                     else get_nth (x - 1, tl xs)
-                val days_in_month = get_nth (month_of date, days_list)
+                val days_in_month = if valid_month then get_nth (month_of date, days_list) else 32
             in
                 if leap
                 then (day_of date) <= 29
@@ -121,8 +123,6 @@ fun reasonable_date (date : (int * int * int)) =
                 then (day_of date) <= 28
                 else day_of date <= days_in_month
             end
-        val valid_year = (year_of date) > 0
-        val valid_month = (month_of date) > 0 andalso (month_of date) <= 12
     in
         valid_year andalso valid_month andalso valid_day
     end

@@ -36,3 +36,7 @@ val test16 = reasonable_date (2004, 2, 29) = true
 val test17 = number_in_months ([(1, 12, 29), (3, 2, 28), (1, 2, 27),(1, 2, 25), (6, 7, 8)], []) = 0
 
 val test18 = dates_in_months ([(1, 12, 29), (3, 2, 28), (1, 2, 27), (1, 2, 25), (6, 7, 8)], []) = []
+
+val test19 = reasonable_date (2013, 0, 10) = false
+
+val test20 = reasonable_date (2013, 13, 10) = false
