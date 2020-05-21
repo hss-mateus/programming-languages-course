@@ -1,205 +1,138 @@
-fun alternate (xs : int list) =
-    if null (tl xs)
-    then hd xs
-    else hd xs - alternate (tl xs)
+fun alternate (x::[]) = x
+  | alternate (x::xs') = x - (alternate xs')
 
-fun min_max (xs : int list) =
-    let
-        fun max (xs : int list) =
-            if null (tl xs)
-            then hd xs
-            else if hd xs > hd (tl xs)
-            then max (hd xs :: tl (tl xs))
-            else max (tl xs)
-        fun min (xs : int list) =
-            if null (tl xs)
-            then hd xs
-            else if hd xs < hd (tl xs)
-            then min (hd xs :: tl (tl xs))
-            else min (tl xs)
+fun min_max xs =
+    let fun min (x::[]) = x
+          | min (x1::x2::xs') = if x1 < x2 then min (x1::xs') else min (x2::xs')
+        fun max (x::[]) = x
+          | max (x1::x2::xs') = if x1 > x2 then max (x1::xs') else max (x2::xs')
     in
         (min xs, max xs)
     end
 
-fun partial_sum (xs : int list) =
-    if null (tl xs)
-    then hd xs :: []
-    else hd xs :: partial_sum (hd xs + hd (tl xs) :: tl (tl xs))
+fun partial_sum (x::[]) = x::[]
+  | partial_sum (x1::x2::xs') = x1::partial_sum ((x1 + x2)::xs')
 
-fun greeting (name : string option) =
-    let val name = if isSome name then valOf name else "you"
+fun greeting (SOME name) = "Hello there, " ^ name ^ "!"
+  | greeting NONE = "Hello there, you!"
+
+fun repeat ([], _) = []
+  | repeat (x::xs', 0::counts) = repeat (xs', counts)
+  | repeat (x::xs', c::counts) = x::(repeat (x::xs', (c - 1)::counts))
+
+fun add_opt (SOME x, SOME y) = SOME (x + y)
+  | add_opt _ = NONE
+
+fun add_all_opt [] = NONE
+  | add_all_opt (x::[]) = x
+  | add_all_opt (NONE::xs') = add_all_opt xs'
+  | add_all_opt (x::NONE::xs') = add_all_opt (x::xs')
+  | add_all_opt ((SOME x1)::(SOME x2)::xs') = add_all_opt ((SOME (x1 + x2))::xs')
+
+fun any [] = false
+  | any (x::[]) = x
+  | any (x::xs') = x orelse any xs'
+
+fun all [] = true
+  | all (x::[]) = x
+  | all (x::xs') = if not x then false else all xs'
+
+fun zip  ([], _) = []
+  | zip (_, []) = []
+  | zip (x::xs', y::ys') = (x, y)::zip (xs', ys')
+
+fun zip_recycle (xs, ys) =
+    let fun aux ([], []) = []
+          | aux ([], ys_copy) = aux (xs, ys_copy)
+          | aux (xs_copy, []) = []
+          | aux (x::xs', y::ys') = (x, y)::(aux (xs', ys'))
     in
-        "Hello there, " ^ name ^ "!"
+        aux (xs, ys)
     end
 
-fun repeat (xs : (int list * int list)) =
-    if null (#2 xs)
-    then #1 xs
-    else if hd (#2 xs) = 0
-    then repeat (tl (#1 xs), tl (#2 xs))
-    else hd (#1 xs) :: repeat (#1 xs, hd (#2 xs) - 1 :: tl (#2 xs))
-
-fun add_opt (xs : (int option * int option)) =
-    if isSome (#1 xs) andalso isSome (#2 xs)
-    then SOME ((valOf (#1 xs)) + (valOf (#2 xs)))
-    else NONE
-
-fun add_all_opt (xs : int option list) =
-    if null xs
-    then NONE
-    else if null (tl xs)
-    then hd xs
-    else if not (isSome (hd xs))
-    then add_all_opt (tl xs)
-    else if not (isSome (hd (tl xs)))
-    then add_all_opt (hd xs :: tl (tl xs))
-    else add_all_opt (SOME (valOf (hd xs) + valOf (hd (tl xs))) :: tl (tl xs))
-
-fun any (xs : bool list) =
-    if null xs
-    then false
-    else if null (tl xs)
-    then hd xs
-    else if hd xs
-    then true
-    else any (tl xs)
-
-fun all (xs : bool list) =
-    if null xs
-    then true
-    else if null (tl xs)
-    then hd xs
-    else if not (hd xs)
-    then false
-    else all (tl xs)
-
-fun zip (xs : (int list * int list)) =
-    let
-        fun make_pairs (xs : (int list * int list), pairs : (int * int) list) =
-            if null (#1 xs) orelse null (#2 xs)
-            then pairs
-            else (hd (#1 xs), hd (#2 xs)) :: make_pairs ((tl (#1 xs), tl (#2 xs)), pairs)
+fun zip_opt xs =
+    let fun same_length ([], _::_) = false
+          | same_length (_::_, []) = false
+          | same_length ([], []) = true
+          | same_length (_::xs', _::ys') = same_length (xs', ys')
     in
-        make_pairs (xs, [])
-    end
-
-fun zip_recycle (xs : (int list * int list)) =
-    let
-        fun make_pairs (xs_copy : (int list * int list), pairs : (int * int) list) =
-            if null (#2 xs_copy)
-            then pairs
-            else if null (#1 xs_copy)
-            then make_pairs ((#1 xs, #2 xs_copy), pairs)
-            else (hd (#1 xs_copy), hd (#2 xs_copy)) ::
-                 make_pairs ((tl (#1 xs_copy), tl (#2 xs_copy)), pairs)
-    in
-        make_pairs (xs, [])
-    end
-
-fun zip_opt (xs : (int list * int list)) =
-    let
-        fun same_length (xs : (int list * int list)) =
-            if null (tl (#1 xs)) andalso not (null (tl (#2 xs)))
-               orelse not (null (tl (#1 xs))) andalso null (tl (#2 xs))
-            then false
-            else if null (tl (#1 xs)) andalso null (tl (#2 xs))
-            then true
-            else same_length (tl (#1 xs), tl (#2 xs))
-    in
-        if same_length (#1 xs, #2 xs)
+        if same_length xs
         then SOME (zip xs)
         else NONE
     end
 
-fun lookup (look : ((string * int) list * string)) =
-    if #2 look = (#1 (hd (#1 look)))
-    then SOME (#2 (hd (#1 look)))
-    else if null (tl (#1 look))
-    then NONE
-    else lookup (tl (#1 look), #2 look)
+fun lookup ([], _) = NONE
+  | lookup ((s, i)::xs', str) = if s = str
+                                then SOME i
+                                else lookup (xs', str)
 
-fun splitup (xs : int list) =
-    let
-        fun split (xs : int list, lists : (int list * int list)) =
-            if null xs
-            then lists
-            else if hd xs < 0
-            then split (tl xs, (#1 lists, (#2 lists) @ [hd xs]))
-            else split (tl xs, ((#1 lists) @ [hd xs], #2 lists))
+fun splitup xs =
+    let fun aux ([], lsts) = lsts
+          | aux (x::xs', (neg, pos)) = if x < 0
+                                       then aux (xs', (neg @ [x], pos))
+                                       else aux (xs', (neg, pos @ [x]))
     in
-        split (xs, ([], []))
+        aux (xs, ([], []))
     end
 
-fun split_at (xs : ((int list) * int)) =
-    let
-        fun split (lst : int list, lists : (int list * int list)) =
-            if null lst
-            then lists
-            else if hd lst <= #2 xs
-            then split (tl lst, ((#1 lists) @ [hd lst], #2 lists))
-            else split (tl lst, (#1 lists, (#2 lists) @ [hd lst]))
+fun split_at (xs, n) =
+    let fun aux ([], lsts) = lsts
+          | aux (x::xs', (l, r)) = if x < n
+                                   then aux (xs', (l @ [x], r))
+                                   else aux (xs', (l, r @ [x]))
     in
-        split (#1 xs, ([], []))
+        aux (xs, ([], []))
     end
 
-fun is_sorted (xs : int list) =
-    if null xs orelse null (tl xs)
-    then true
-    else if hd xs > hd (tl xs)
-    then false
-    else is_sorted (tl xs)
+fun is_sorted [] = true
+  | is_sorted (x::[]) = true
+  | is_sorted (x1::x2::xs') = if x1 < x2
+                              then is_sorted (x2::xs')
+                              else false
 
-fun is_any_sorted (xs : int list) =
-    let
-        fun is_sorted_dec (xs : int list) =
-            if null xs orelse null (tl xs)
-            then true
-            else if hd xs < hd (tl xs)
-            then false
-            else is_sorted_dec (tl xs)
+fun is_any_sorted xs =
+    let fun is_sorted_dec [] = true
+          | is_sorted_dec (x::[]) = true
+          | is_sorted_dec (x1::x2::xs') = if x1 > x2
+                                          then is_sorted_dec (x2::xs')
+                                          else false
     in
         is_sorted xs orelse is_sorted_dec xs
     end
 
-fun sorted_merge (lists : (int list * int list)) =
-    let
-        fun merge (items : int * int) =
-            if #1 items > #2 items
-            then [#2 items, #1 items]
-            else [#1 items, #2 items]
-        fun iterate (lists : (int list * int list), result : int list) =
-            if null (#1 lists)
-            then result @ (#2 lists)
-            else if null (#2 lists)
-            then result @ (#1 lists)
-            else iterate ((tl (#1 lists), tl (#2 lists)),
-                          result @ (merge (hd (#1 lists), hd (#2 lists))))
+fun sorted_merge lsts =
+    let fun aux ([], []) = []
+          | aux (x::xs', y::ys') = if x > y
+                                   then [y, x]::aux (xs', ys')
+                                   else [x, y]::aux (xs', ys')
     in
-        iterate(lists, [])
+        aux lsts
+    end
+
+fun divide xs =
+    let fun aux ([], lsts) = lsts
+          | aux (x::[], (l, r)) = aux ([], (l @ [x], r))
+          | aux (x1::x2::xs', (l, r)) = aux (xs', (l @ [x1], r @ [x2]))
+    in
+        aux (xs, ([], []))
+    end
+
+fun full_divide (k, n) =
+    let fun aux (d, n2) = if n2 mod k = 0
+                          then aux (d + 1, n2 div k)
+                          else (d, n2)
+    in
+        aux (0, n)
     end
 
 (* TODO
-fun qsort (xs : int list) =
- *)
+fun qstort xs =
 
-fun divide (xs : int list) =
-    let
-        fun split (xs : int list, result : (int list * int list)) =
-            if null xs
-            then result
-            else if null (tl xs)
-            then split (tl xs, ((#1 result) @ [hd xs], #2 result))
-            else split (tl (tl xs), ((#1 result) @ [hd xs], (#2 result) @ [hd (tl xs)]))
-    in
-        split (xs, ([], []))
-    end
+fun not_so_quick_sort xs =
 
-fun full_divide (xs : (int * int)) =
-    let
-        fun divide (attempt : (int * int)) =
-            if (#2 attempt) mod (#1 xs) = 0
-            then divide ((#1 attempt) + 1, (#2 attempt) div (#1 xs))
-            else attempt
-    in
-        divide (0, #2 xs)
-    end
+fun factorize x =
+
+fun multiply pairs =
+
+fun all_products pairs =
+*)
