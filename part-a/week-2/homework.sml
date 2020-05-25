@@ -83,24 +83,26 @@ fun oldest (dates : (int * int * int) list) =
     then oldest ((hd dates) :: (tl (tl dates)))
     else oldest (tl dates)
 
-fun number_in_months_challenge (dates : (int*int*int) list, months : int list) =
-    let
-        fun exists_in_list (x : int, xs : int list) =
-            if null (xs)
+fun remove_duplicates (xs : int list) =
+    let fun exists_in_list (x : int, xs : int list) =
+            if null xs
             then false
             else if x <> hd xs
             then exists_in_list (x, tl xs)
             else true
-        fun remove_duplicates (xs : int list) =
-            if null (tl xs)
-            then hd xs :: []
-            else if exists_in_list(hd xs, tl xs)
-            then remove_duplicates(tl xs)
-            else hd xs :: remove_duplicates(tl xs)
-        val unique_months = remove_duplicates months
     in
-        number_in_months (dates, unique_months)
+        if null (tl xs)
+        then hd xs :: []
+        else if exists_in_list(hd xs, tl xs)
+        then remove_duplicates(tl xs)
+        else hd xs :: remove_duplicates(tl xs)
     end
+
+fun number_in_months_challenge (dates : (int*int*int) list, months : int list) =
+    number_in_months (dates, remove_duplicates months)
+
+fun dates_in_months_challenge (dates : (int * int * int) list, months : int list) =
+    dates_in_months (dates, remove_duplicates months)
 
 fun reasonable_date (date : (int * int * int)) =
     let
