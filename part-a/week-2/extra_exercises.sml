@@ -1,120 +1,123 @@
-fun alternate (x::[]) = x
-  | alternate (x::xs') = x - (alternate xs')
+fun alternate [] = 0
+  | alternate (x::[]) = x
+  | alternate (x::xs) = x - (alternate xs)
 
 fun min_max xs =
-    let fun min (x::[]) = x
-          | min (x1::x2::xs') = if x1 < x2 then min (x1::xs') else min (x2::xs')
-        fun max (x::[]) = x
-          | max (x1::x2::xs') = if x1 > x2 then max (x1::xs') else max (x2::xs')
+    let fun aux (x, (min, max)) =
+            (Int.min (x, min), (Int.max (x, max)))
     in
-        (min xs, max xs)
+        List.foldl aux (hd xs, hd xs) xs
     end
 
-fun partial_sum (x::[]) = x::[]
-  | partial_sum (x1::x2::xs') = x1::partial_sum ((x1 + x2)::xs')
+fun partial_sum [] = []
+  | partial_sum (x::[]) = x::[]
+  | partial_sum (x::y::xs) = x::partial_sum ((x + y)::xs)
 
-fun greeting (SOME name) = "Hello there, " ^ name ^ "!"
-  | greeting NONE = "Hello there, you!"
+fun greeting name = "Hello there, " ^ getOpt (name, "you") ^ "!"
 
 fun repeat ([], _) = []
-  | repeat (x::xs', 0::counts) = repeat (xs', counts)
-  | repeat (x::xs', c::counts) = x::(repeat (x::xs', (c - 1)::counts))
+  | repeat (xs, []) = xs
+  | repeat (x::xs, 0::counts) = repeat (xs, counts)
+  | repeat (x::xs, c::counts) = x::(repeat (x::xs, (c - 1)::counts))
 
 fun add_opt (SOME x, SOME y) = SOME (x + y)
   | add_opt _ = NONE
 
 fun add_all_opt [] = NONE
   | add_all_opt (x::[]) = x
-  | add_all_opt (NONE::xs') = add_all_opt xs'
-  | add_all_opt (x::NONE::xs') = add_all_opt (x::xs')
-  | add_all_opt ((SOME x1)::(SOME x2)::xs') = add_all_opt ((SOME (x1 + x2))::xs')
+  | add_all_opt (NONE::xs) = add_all_opt xs
+  | add_all_opt (x::NONE::xs) = add_all_opt (x::xs)
+  | add_all_opt ((SOME x)::(SOME y)::xs) = add_all_opt ((SOME (x + y))::xs)
 
 fun any [] = false
   | any (x::[]) = x
-  | any (x::xs') = x orelse any xs'
+  | any (x::xs) = x orelse any xs
 
 fun all [] = true
   | all (x::[]) = x
-  | all (x::xs') = if not x then false else all xs'
+  | all (x::xs) = x andalso all xs
 
 fun zip  ([], _) = []
   | zip (_, []) = []
-  | zip (x::xs', y::ys') = (x, y)::zip (xs', ys')
+  | zip (x::xs, y::ys) = (x, y)::zip (xs, ys)
 
 fun zip_recycle (xs, ys) =
     let fun aux ([], []) = []
           | aux ([], ys_copy) = aux (xs, ys_copy)
           | aux (xs_copy, []) = []
-          | aux (x::xs', y::ys') = (x, y)::(aux (xs', ys'))
+          | aux (x::xs, y::ys) = (x, y)::aux (xs, ys)
     in
         aux (xs, ys)
     end
 
-fun zip_opt xs =
-    let fun same_length ([], _::_) = false
-          | same_length (_::_, []) = false
-          | same_length ([], []) = true
-          | same_length (_::xs', _::ys') = same_length (xs', ys')
-    in
-        if same_length xs
-        then SOME (zip xs)
-        else NONE
-    end
+fun zip_opt (xs, ys) =
+    if length xs = length ys
+    then SOME (zip (xs, ys))
+    else NONE
 
 fun lookup ([], _) = NONE
-  | lookup ((s, i)::xs', str) = if s = str
-                                then SOME i
-                                else lookup (xs', str)
+  | lookup ((s, i)::xs, str) = if s = str
+                               then SOME i
+                               else lookup (xs, str)
 
 fun splitup xs =
     let fun aux ([], lsts) = lsts
-          | aux (x::xs', (neg, pos)) = if x < 0
-                                       then aux (xs', (neg @ [x], pos))
-                                       else aux (xs', (neg, pos @ [x]))
+          | aux (x::xs, (neg, pos)) = if x < 0
+                                      then aux (xs, (neg @ [x], pos))
+                                      else aux (xs, (neg, pos @ [x]))
     in
         aux (xs, ([], []))
     end
 
 fun split_at (xs, n) =
     let fun aux ([], lsts) = lsts
-          | aux (x::xs', (l, r)) = if x < n
-                                   then aux (xs', (l @ [x], r))
-                                   else aux (xs', (l, r @ [x]))
+          | aux (x::xs, (l, r)) = if x < n
+                                   then aux (xs, (l @ [x], r))
+                                   else aux (xs, (l, r @ [x]))
     in
         aux (xs, ([], []))
     end
 
 fun is_sorted [] = true
   | is_sorted (x::[]) = true
-  | is_sorted (x1::x2::xs') = if x1 < x2
-                              then is_sorted (x2::xs')
-                              else false
+  | is_sorted (x::y::xs) = x < y andalso is_sorted (y::xs)
 
 fun is_any_sorted xs =
     let fun is_sorted_dec [] = true
           | is_sorted_dec (x::[]) = true
-          | is_sorted_dec (x1::x2::xs') = if x1 > x2
-                                          then is_sorted_dec (x2::xs')
-                                          else false
+          | is_sorted_dec (x::y::xs) = x > y andalso is_sorted_dec (y::xs)
     in
         is_sorted xs orelse is_sorted_dec xs
     end
 
-fun sorted_merge lsts =
-    let fun aux ([], []) = []
-          | aux (x::xs', y::ys') = if x > y
-                                   then [y, x]::aux (xs', ys')
-                                   else [x, y]::aux (xs', ys')
+fun sorted_merge ([], []) = []
+  | sorted_merge ([], ys) = ys
+  | sorted_merge (xs, []) = xs
+  | sorted_merge (x::xs, y::ys) = if x > y
+                                  then y::(sorted_merge (x::xs, ys))
+                                  else x::(sorted_merge (xs, y::ys))
+
+fun qsort [] = []
+  | qsort (x::xs) =
+    let val (left, right) = split_at (xs, x)
     in
-        aux lsts
+        (qsort left) @ x :: (qsort right)
     end
 
 fun divide xs =
     let fun aux ([], lsts) = lsts
           | aux (x::[], (l, r)) = aux ([], (l @ [x], r))
-          | aux (x1::x2::xs', (l, r)) = aux (xs', (l @ [x1], r @ [x2]))
+          | aux (x1::x2::xs, (l, r)) = aux (xs, (l @ [x1], r @ [x2]))
     in
         aux (xs, ([], []))
+    end
+
+fun not_so_quick_sort [] = []
+  | not_so_quick_sort xs =
+    let
+        val (xs, ys) = divide xs
+    in
+        sorted_merge (qsort xs, qsort ys)
     end
 
 fun full_divide (k, n) =
@@ -126,10 +129,6 @@ fun full_divide (k, n) =
     end
 
 (* TODO
-fun qstort xs =
-
-fun not_so_quick_sort xs =
-
 fun factorize x =
 
 fun multiply pairs =

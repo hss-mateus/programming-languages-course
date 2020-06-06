@@ -1,22 +1,22 @@
 use "extra_exercises.sml";
 
-val test1 = alternate [1, 2, 3, 4] = ~2
+val test01 = alternate [1, 2, 3, 4] = ~2
 
-val test2 = min_max [1, 2, 3, 4] = (1, 4)
+val test02 = min_max [1, 2, 3, 4] = (1, 4)
 
-val test3 = partial_sum [1, 4, 20] = [1, 5, 25]
+val test03 = partial_sum [1, 4, 20] = [1, 5, 25]
 
-val test4 = greeting (SOME "Fred") = "Hello there, Fred!"
+val test04 = greeting (SOME "Fred") = "Hello there, Fred!"
 
-val test5 = greeting NONE = "Hello there, you!"
+val test05 = greeting NONE = "Hello there, you!"
 
-val test6 = repeat ([1, 2, 3], [4, 0, 3]) = [1, 1, 1, 1, 3, 3, 3]
+val test06 = repeat ([1, 2, 3], [4, 0, 3]) = [1, 1, 1, 1, 3, 3, 3]
 
-val test7 = add_opt (SOME 1, SOME 2) = SOME 3
+val test07 = add_opt (SOME 1, SOME 2) = SOME 3
 
-val test8 = add_opt (NONE, SOME 2) = NONE
+val test08 = add_opt (NONE, SOME 2) = NONE
 
-val test9 = add_all_opt [SOME 1, NONE, SOME 3] = SOME 4
+val test09 = add_all_opt [SOME 1, NONE, SOME 3] = SOME 4
 
 val test10 = any [false, false, true, false] = true
 
@@ -41,8 +41,14 @@ val test19 = is_sorted [1, ~2, 3, 4] = false
 
 val test20 = is_any_sorted [1, 0, ~1, ~2] = true
 
-val test21 = divide [1, 2, 3, 4, 5, 6, 7] = ([1, 3, 5, 7], [2, 4, 6])
+val test21 = sorted_merge ([1, 4, 7], [5, 8, 9, 10, 11, 13]) = [1, 4, 5, 7, 8, 9, 10, 11, 13]
 
-val test22 = full_divide (2, 40) = (3, 5)
+val test22 = qsort [11, 13, 1, 42, 2, 11, 3, 2, 14, 8, 7] = [1, 2, 2, 3, 7, 8, 11, 11, 13, 14, 42]
 
-val test23 = full_divide (3, 10) = (0, 10)
+val test23 = divide [1, 2, 3, 4, 5, 6, 7] = ([1, 3, 5, 7], [2, 4, 6])
+
+val test24 = not_so_quick_sort([11, 13 ,1 ,42 ,2 ,11 ,3]) = [1, 2, 3, 11, 11, 13, 42]
+
+val test25 = full_divide (2, 40) = (3, 5)
+
+val test26 = full_divide (3, 10) = (0, 10)
